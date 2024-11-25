@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fetch Data Example</title>
+</head>
+<body>
+  <h1>User Data</h1>
+  <ul id="user-list"></ul>
+
+  <h2>Add New User</h2>
+  <form id="user-form">
+    <label for="nom">nom:</label>
+    <input type="text" id="nom" name="nom" required>
+    <br>
+    <button type="submit">Add User</button>
+  </form>
+
+  <script>
+    async function fetchUserData() {
+      const userList = document.getElementById('user-list');
+
+      try {
+        const response = await fetch('http://localhost:3000/user');
+        if (!response.ok) {
+          throw new Error(`Error: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+
+        userList.innerHTML = data.map(user => `<li>${user.nom}</li>`).join('');
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        userList.innerHTML = '<li>Failed to load user data.</li>';
+      }
+    }
+
+        // Function to handle form submission
+        async function handleFormSubmit(event) {
+      event.preventDefault(); // Prevent the default form submission behavior
+
+      const nomInput = document.getElementById('nom');
+
+      const newUser = {
+        nom: nomInput.value,
+      };
+
+      try {
+        const response = await fetch("http://localhost:3000/user", {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(newUser),
+        });
+
+        if (!response.ok) {
+          throw new Error(`Error: ${response.statusText}`);
+        }
+
+        // Clear the form
+        nomInput.value = '';
+
+        // Refresh the user list
+        fetchUserData();
+      } catch (error) {
+        console.error('Error posting data:', error);
+        alert('Failed to add user.');
+      }
+    }
+
+    // Attach event listener to the form
+    const userForm = document.getElementById('user-form');
+    userForm.addEventListener('submit', handleFormSubmit);
+
+
+    fetchUserData();
+  </script>
+</body>
+</html>
